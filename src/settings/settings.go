@@ -1,9 +1,14 @@
-package cmd
+package settings
 
 import (
 	"fmt"
+	"log"
 
-	"github.com/spf13/cobra"
+	cobra "github.com/spf13/cobra"
+)
+
+var (
+	Network string
 )
 
 func Init() *cobra.Command {
@@ -11,9 +16,14 @@ func Init() *cobra.Command {
 		Use:   "evm-cli",
 		Short: "CLI tool for query and send Tx from evm chain.",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			fmt.Println("evm-cli")
+			fmt.Println("Running evm-cli...")
+			if Network == "" {
+				log.Fatal("Error: Network flag is required")
+			}
+			fmt.Printf("Using network: %s\n", Network)
 		},
 	}
+	cmd.PersistentFlags().StringVar(&Network, "network", "", "which blockchain.")
 
 	show := &cobra.Command{
 		Use:     "show",
