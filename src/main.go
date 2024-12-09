@@ -1,23 +1,33 @@
 package main
 
 import (
-	settings "github.com/Chan7348/evm-cli/src/settings"
+	"fmt"
+
+	"github.com/Chan7348/evm-cli/src/config"
+	"github.com/Chan7348/evm-cli/src/sendTx"
+	"github.com/Chan7348/evm-cli/src/show"
 	"github.com/Chan7348/evm-cli/src/view"
-	common "github.com/ethereum/go-ethereum/common"
+	"github.com/spf13/cobra"
 )
 
 func main() {
+	cmd := &cobra.Command{
+		Use:   "evm-cli",
+		Short: "CLI tool for call and send Txs to evm chains.",
 
-	setting := settings.Init()
-	setting.Execute()
-
-	var weth common.Address
-
-	if settings.Network == "base" {
-		weth = common.HexToAddress("0x4200000000000000000000000000000000000006")
-	} else if settings.Network == "ethereum" {
-		weth = common.HexToAddress("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")
+		// 执行命令前的检查
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			fmt.Println("Running evm-cli......")
+			fmt.Printf("Using network: %s\n", config.Network)
+		},
 	}
 
-	view.CallMethod(weth, "totalSupply()", nil)
+	cmd.PersistentFlags().StringVar(&config.Network, "network", "", "Which blockchain to interact with")
+	cmd.MarkPersistentFlagRequired("network")
+
+	// load commands
+	cmd.AddCommand(show.Init(), view.Init(), sendTx.Init())
+
+	// Run
+	cmd.Execute()
 }
